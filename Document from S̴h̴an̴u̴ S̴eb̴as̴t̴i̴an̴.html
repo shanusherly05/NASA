@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MISSION CONTROL — Space Mission Simulator</title>
+<style>
+:root{--bg:#080d18;--panel:#101a2b;--panel2:#142238;--line:#263752;--text:#e9f0fb;--muted:#8da1bd;--cyan:#65d7e8;--lime:#c6f36b;--orange:#ffbd69;--red:#ff7474;--green:#83e0a5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 70% -10%,#1b3152 0%,#0a1221 45%,#070b13 100%);color:var(--text);font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+button,select,input{font:inherit}button{cursor:pointer}
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px clamp(16px,4vw,54px);border-bottom:1px solid #26344c;background:#080e19cc;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.brand{display:flex;align-items:center;gap:12px;letter-spacing:.13em;font-weight:800}.mark{width:34px;height:34px;border:1px solid var(--cyan);border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:18px;box-shadow:0 0 18px #65d7e833}
+.top small{color:var(--muted);letter-spacing:.12em}.status{font-size:11px;letter-spacing:.12em;color:var(--green);border:1px solid #83e0a555;padding:6px 10px;border-radius:30px}
+main{max-width:1440px;margin:auto;padding:28px clamp(14px,3vw,42px) 70px}
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:20px;margin-bottom:20px}
+.heroText,.visual,.panel{background:linear-gradient(145deg,#14233aee,#0e1829ee);border:1px solid var(--line);border-radius:18px}
+.heroText{padding:clamp(20px,3vw,36px);position:relative;overflow:hidden}.eyebrow{color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+h1{font-size:clamp(32px,5vw,58px);line-height:1.02;letter-spacing:-.045em;margin:12px 0}.heroText p{max-width:650px;color:#aabbd2;font-size:16px}
+.heroStats{display:flex;gap:26px;flex-wrap:wrap;margin-top:26px}.heroStats strong{display:block;font-size:22px}.heroStats span{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.visual{min-height:240px;position:relative;overflow:hidden;background:linear-gradient(180deg,#0b1a2d,#111c2e 55%,#101726)}
+.stars{position:absolute;inset:0;background-image:radial-gradient(1px 1px at 10% 20%,#fff 99%,transparent),radial-gradient(1px 1px at 30% 70%,#fff 99%,transparent),radial-gradient(2px 2px at 80% 25%,#b7eaff 99%,transparent),radial-gradient(1px 1px at 60% 50%,#fff 99%,transparent),radial-gradient(1px 1px at 90% 80%,#fff 99%,transparent),radial-gradient(1px 1px at 45% 15%,#fff 99%,transparent);background-size:190px 150px}
+.planet{position:absolute;width:230px;height:230px;border-radius:50%;right:5%;bottom:-105px;background:radial-gradient(circle at 35% 25%,#78d5d9,#27638a 42%,#10294a 70%,#07111f);box-shadow:inset -25px -15px 35px #030915,0 -10px 55px #3f9bc755}
+.orbit{position:absolute;width:300px;height:100px;border:1px solid #8eddf477;border-radius:50%;right:0;bottom:42px;transform:rotate(-22deg)}
+.sat{position:absolute;right:32%;bottom:105px;width:48px;height:17px;background:#d9e6ed;border-radius:3px;transform:rotate(-22deg);box-shadow:0 0 16px #65d7e866}
+.sat:before,.sat:after{content:"";position:absolute;top:-8px;width:27px;height:33px;background:repeating-linear-gradient(90deg,#28608d 0 5px,#80b8d4 5px 7px);border:1px solid #a9d8e8}.sat:before{right:100%}.sat:after{left:100%}
+.visualLabel{position:absolute;left:22px;top:22px;color:#9bb1c9;font-size:10px;letter-spacing:.16em}
+.layout{display:grid;grid-template-columns: minmax(0,1.55fr) minmax(290px,.75fr);gap:20px;align-items:start}
+.panel{padding:22px;margin-bottom:18px}.panelHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.panel h2{font-size:17px;margin:0;letter-spacing:.01em}.step{font-size:10px;color:var(--cyan);letter-spacing:.16em;font-weight:800}
+.fieldGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:12px;color:#b7c7db;font-weight:650}.field small{color:var(--muted);font-size:11px}
+select{width:100%;background:#0a1423;color:var(--text);border:1px solid #344760;border-radius:9px;padding:11px 12px;outline:none}select:focus{border-color:var(--cyan)}
+.rangeRow{display:flex;justify-content:space-between;color:#c8d5e6;font-size:12px}.rangeRow b{color:var(--lime)}input[type=range]{width:100%;accent-color:var(--cyan)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{padding:13px;background:#0a1423;border:1px solid #263852;border-radius:12px}.metric span{display:block;color:var(--muted);font-size:10px;letter-spacing:.1em;text-transform:uppercase}.metric strong{font-size:21px;display:block;margin-top:4px}.metric em{font-size:10px;color:var(--muted);font-style:normal}
+.bar{height:7px;background:#26364c;border-radius:10px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,var(--cyan),var(--lime))}
+.checks{display:grid;gap:9px}.check{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#0b1524;border-radius:9px;border:1px solid #243650;font-size:12px}.pill{font-size:10px;font-weight:800;letter-spacing:.1em;border-radius:30px;padding:4px 8px}.pass{color:var(--green);background:#83e0a51a}.fail{color:var(--red);background:#ff74741a}.warn{color:var(--orange);background:#ffbd691a}
+.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;letter-spacing:.04em;background:var(--lime);color:#14200a;transition:.15s}.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}.btn.secondary{background:#1b2b42;color:#dce9f8;border:1px solid #3a506d}.btn.cyan{background:var(--cyan);color:#06151b}.btn.danger{background:#4a2028;color:#ffd9dd;border:1px solid #8c3946}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.sideSticky{position:sticky;top:88px}.budgetBox{background:#0a1423;border:1px solid #293b55;padding:15px;border-radius:12px}.budgetNum{font-size:30px;font-weight:800;letter-spacing:-.04em}.muted{color:var(--muted)}.tiny{font-size:11px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.tab{padding:8px 11px;border:1px solid #30445e;background:#0b1524;color:#9fb1c9;border-radius:8px;font-size:11px;font-weight:800;letter-spacing:.06em}.tab.active{background:#17374a;border-color:var(--cyan);color:#c9f7ff}
+.phaseCard{border:1px solid #31445f;background:#0a1423;border-radius:12px;padding:16px;margin-top:12px}.phaseCard h3{margin:0 0 6px;font-size:15px}.phaseCard p{margin:0;color:#a7bad1;font-size:13px}
+.log{display:grid;gap:8px;max-height:300px;overflow:auto}.logItem{padding:10px 12px;border-left:2px solid var(--cyan);background:#0a1423;border-radius:0 8px 8px 0;font-size:12px;color:#c6d4e5}.logItem b{color:#fff}
+.hidden{display:none!important}.resultScore{font-size:48px;font-weight:900;color:var(--lime);letter-spacing:-.06em}.resultGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+footer{color:#7186a2;font-size:11px;text-align:center;padding:24px}
+@media(max-width:900px){.hero,.layout{grid-template-columns:1fr}.sideSticky{position:static}.visual{min-height:210px}}
+@media(max-width:560px){.fieldGrid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.resultGrid{grid-template-columns:1fr}.top{padding:14px}.top small{display:none}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><div class="mark">✦</div><div>MISSION CONTROL <small style="display:block;font-size:9px;font-weight:500;letter-spacing:.22em">SPACE SYSTEMS SIMULATOR</small></div></div><div class="status">● SIMULATION READY</div></header>
+<main>
+<section class="hero">
+ <div class="heroText"><div class="eyebrow">Engineering strategy game / v1.0</div><h1>Build a mission.<br><span style="color:var(--cyan)">Make it survive.</span></h1><p>You are the mission director. Design a spacecraft, balance its resources, launch it, and manage the surprises that happen millions of kilometres from home.</p><div class="heroStats"><div><strong>5</strong><span>Mission phases</span></div><div><strong>4</strong><span>Destinations</span></div><div><strong>∞</strong><span>Design combinations</span></div></div></div>
+ <div class="visual"><div class="stars"></div><div class="visualLabel">LIVE MISSION VIEW / DEEP SPACE NETWORK</div><div class="planet"></div><div class="orbit"></div><div class="sat"></div></div>
+</section>
+<div class="layout">
+<div>
+ <section class="panel" id="design">
+  <div class="panelHead"><div><div class="step">01 — DEFINE THE MISSION</div><h2>Mission architecture</h2></div><span class="pill pass">DESIGN PHASE</span></div>
+  <div class="fieldGrid">
+   <div class="field"><label for="objective">Scientific objective</label><select id="objective"><option value="mars">Mars reconnaissance</option><option value="moon">Lunar resource survey</option><option value="earth">Earth climate observation</option><option value="asteroid">Asteroid composition study</option></select><small>Sets the target and science priorities.</small></div>
+   <div class="field"><label for="orbit">Mission destination / orbit</label><select id="orbit"><option value="mars">Mars transfer trajectory</option><option value="moon">Lunar orbit</option><option value="leo">Low Earth orbit</option><option value="geo">Geostationary orbit</option><option value="asteroid">Near-Earth asteroid rendezvous</option></select><small>Different destinations demand different Δv.</small></div>
+   <div class="field"><label for="instrument">Primary science instrument</label><select id="instrument"><option value="camera">High-resolution camera</option><option value="spectrometer">Imaging spectrometer</option><option value="radar">Synthetic aperture radar</option><option value="particle">Particle detector</option><option value="suite">Multi-instrument science suite</option></select><small id="instrumentInfo">Mass 85 kg · 110 W · science value 30</small></div>
+   <div class="field"><label for="engine">Propulsion technology</label><select id="engine"><option value="chemical">Chemical propulsion</option><option value="ion">Electric ion propulsion</option><option value="hybrid">Solar-electric hybrid</option></select><small id="engineInfo">High thrust, lower specific impulse.</small></div>
+   <div class="field"><label for="launcher">Launch vehicle</label><select id="launcher"><option value="medium">Medium lift vehicle</option><option value="small">Small launch vehicle</option><option value="heavy">Heavy lift vehicle</option></select><small id="launcherInfo">Payload capacity 1,200 kg · $42M</small></div>
+   <div class="field"><label for="antenna">Communications system</label><select id="antenna"><option value="high">High-gain dish</option><option value="basic">Basic antenna</option><option value="deep">Deep-space array</option></select><small>Trade mass and power for data rate and range.</small></div>
+  </div>
+  <div style="margin-top:18px"><div class="rangeRow"><label for="solar">Solar array capacity</label><b id="solarVal">450 W</b></div><input id="solar" type="range" min="150" max="900" step="25" value="450"><div class="rangeRow"><span class="muted">Lightweight</span><span class="muted">More power / more mass / more cost</span></div></div>
+  <div style="margin-top:14px"><div class="rangeRow"><label for="fuel">Propellant allocation</label><b id="fuelVal">300 kg</b></div><input id="fuel" type="range" min="100" max="700" step="25" value="300"><div class="rangeRow"><span class="muted">Less Δv</span><span class="muted">More Δv / more mass</span></div></div>
+  <div style="margin-top:14px"><div class="rangeRow"><label for="budget">Mission budget</label><b id="budgetVal">$180M</b></div><input id="budget" type="range" min="80" max="350" step="5" value="180"></div>
+ </section>
+ <section class="panel">
+  <div class="panelHead"><div><div class="step">02 — ENGINEERING REVIEW</div><h2>Spacecraft systems & constraints</h2></div><span class="pill" id="readyPill">CALCULATING</span></div>
+  <div class="metrics">
+   <div class="metric"><span>Wet mass</span><strong id="mass">—</strong><em id="massSub">kg incl. propellant</em><div class="bar"><i id="massBar"></i></div></div>
+   <div class="metric"><span>Power margin</span><strong id="power">—</strong><em id="powerSub">watts spare</em><div class="bar"><i id="powerBar"></i></div></div>
+   <div class="metric"><span>Δv estimate</span><strong id="dv">—</strong><em>km/s available</em><div class="bar"><i id="dvBar"></i></div></div>
+   <div class="metric"><span>Estimated cost</span><strong id="cost">—</strong><em id="costSub">million USD</em><div class="bar"><i id="costBar"></i></div></div>
+  </div>
+  <div style="margin-top:18px" class="checks" id="checks"></div>
+  <div class="actions"><button class="btn" id="launchBtn" disabled>PROCEED TO LAUNCH →</button><button class="btn secondary" id="resetBtn">RESET DESIGN</button></div>
+ </section>
+ <section class="panel hidden" id="launchPanel">
+  <div class="panelHead"><div><div class="step">03 — LAUNCH SEQUENCE</div><h2>Flight readiness & insertion</h2></div><span class="pill warn">COUNTDOWN</span></div>
+  <p class="muted">The vehicle is on the pad. Review the flight plan, then commit to launch. Your design constraints determine the insertion quality.</p>
+  <div class="phaseCard"><h3 id="launchTitle">Launch window: nominal</h3><p id="launchDesc">The launch vehicle will inject the spacecraft toward its target.</p></div>
+  <div class="actions"><button class="btn cyan" id="countdownBtn">INITIATE COUNTDOWN</button></div>
+  <div id="launchOutcome" class="phaseCard hidden"></div>
+ </section>
+ <section class="panel hidden" id="opsPanel">
+  <div class="panelHead"><div><div class="step">04 — MISSION OPERATIONS</div><h2 id="opsTitle">Cruise phase</h2></div><span class="pill pass" id="dayPill">DAY 001</span></div>
+  <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+   <div class="metric"><span>Power reserve</span><strong id="opsPower">100%</strong></div><div class="metric"><span>Propellant</span><strong id="opsFuel">100%</strong></div><div class="metric"><span>Spacecraft health</span><strong id="opsHealth">100%</strong></div>
+  </div>
+  <div class="phaseCard"><h3 id="eventTitle">Mission event</h3><p id="eventText">Awaiting telemetry...</p></div>
+  <div class="actions" id="eventActions"></div>
+  <div class="actions"><button class="btn secondary" id="nextDay">ADVANCE MISSION DAY →</button></div>
+ </section>
+ <section class="panel hidden" id="resultsPanel">
+  <div class="panelHead"><div><div class="step">05 — POST-MISSION REVIEW</div><h2>Mission debrief</h2></div><span class="pill pass">REPORT GENERATED</span></div>
+  <div class="resultScore" id="finalScore">—</div><p id="resultHeadline" style="font-size:18px;font-weight:800"></p><p class="muted" id="resultText"></p>
+  <div class="resultGrid" id="resultGrid"></div>
+  <div class="phaseCard"><h3>Mission log</h3><div class="log" id="finalLog"></div></div>
+  <div class="actions"><button class="btn" id="playAgain">DESIGN ANOTHER MISSION ↻</button></div>
+ </section>
+</div>
+<aside class="sideSticky">
+ <section class="panel">
+  <div class="panelHead"><div><div class="step">MISSION DASHBOARD</div><h2>Resource ledger</h2></div><span style="color:var(--lime)">◈</span></div>
+  <div class="budgetBox"><div class="tiny muted">PROJECTED PROGRAM COST</div><div class="budgetNum" id="sideCost">$—M</div><div class="bar"><i id="sideBudgetBar"></i></div><div class="rangeRow" style="margin-top:8px"><span>Budget ceiling</span><b id="sideBudget">$180M</b></div></div>
+  <div style="margin-top:15px;display:grid;gap:12px">
+   <div><div class="rangeRow"><span>Mass vs launcher capacity</span><b id="massRatio">—</b></div><div class="bar"><i id="sideMassBar"></i></div></div>
+   <div><div class="rangeRow"><span>Power generation / demand</span><b id="powerRatio">—</b></div><div class="bar"><i id="sidePowerBar"></i></div></div>
+   <div><div class="rangeRow"><span>Required Δv / available Δv</span><b id="dvRatio">—</b></div><div class="bar"><i id="sideDvBar"></i></div></div>
+  </div>
+ </section>
+ <section class="panel">
+  <div class="step">MISSION CONTROL NOTES</div><h2 style="margin:5px 0 12px">Engineering hints</h2>
+  <div class="log" id="hints"><div class="logItem">Choose a target first. It determines your approximate energy requirement.</div><div class="logItem">Propellant increases Δv, but also increases the mass you must accelerate.</div><div class="logItem">Electric propulsion is efficient, but it needs substantial electrical power.</div><div class="logItem">A larger antenna improves communications but consumes mass, power and money.</div></div>
+ </section>
+ <section class="panel"><div class="step">SIMULATION MODEL</div><p class="tiny muted">Educational, simplified engineering model. The rocket equation is used for Δv; launch, power, cost and operations are game abstractions, not flight-certified predictions.</p></section>
+</aside>
+</div>
+</main>
+<footer>MISSION CONTROL / EDUCATIONAL SPACE SYSTEMS SIMULATOR · No real spacecraft commands are issued.</footer>
+<script>
+const $=id=>document.getElementById(id);
+const data={
+ instrument:{camera:{mass:85,power:110,cost:18,science:30},spectrometer:{mass:115,power:150,cost:25,science:42},radar:{mass:190,power:260,cost:32,science:50},particle:{mass:60,power:75,cost:15,science:28},suite:{mass:285,power:390,cost:52,science:68}},
+ engine:{chemical:{mass:160,isp:320,cost:24,power:35},ion:{mass:95,isp:1800,cost:42,power:230},hybrid:{mass:130,isp:950,cost:38,power:145}},
+ launcher:{small:{capacity:650,cost:24},medium:{capacity:1200,cost:42},heavy:{capacity:2400,cost:75}},
+ antenna:{basic:{mass:22,power:18,cost:6,link:1},high:{mass:55,power:48,cost:15,link:2},deep:{mass:95,power:85,cost:27,link:3}},
+ target:{mars:{required:5.8,name:"Mars transfer",science:"planetary geology and atmospheric imaging"},moon:{required:4.1,name:"Lunar orbit",science:"surface composition and resource mapping"},leo:{required:1.8,name:"Low Earth orbit",science:"Earth observation and climate monitoring"},geo:{required:4.2,name:"Geostationary orbit",science:"continuous weather and communications"},asteroid:{required:6.4,name:"Asteroid rendezvous",science:"primitive solar-system materials"}}
+};
+let state={launched:false,day:0,power:100,fuel:100,health:100,science:0,log:[],events:[],eventIndex:0,done:false};
+const baseMass=240, g0=9.80665;
+function config(){
+ const i=data.instrument[$('instrument').value],e=data.engine[$('engine').value],l=data.launcher[$('launcher').value],a=data.antenna[$('antenna').value],t=data.target[$('orbit').value];
+ const solar=+$('solar').value,fuel=+$('fuel').value,budget=+$('budget').value;
+ const solarMass=Math.round(solar*.105),powerDemand=i.power+e.power+a.power+75,generated=solar;
+ const dry=baseMass+i.mass+e.mass+a.mass+solarMass,wet=dry+fuel;
+ const dv=e.isp*g0*Math.log(wet/dry)/1000;
+ const launchCost=l.cost,orbitalOps={mars:26,moon:18,leo:9,geo:20,asteroid:34}[$('orbit').value];
+ const cost=launchCost+i.cost+e.cost+a.cost+Math.round(solar*.035)+Math.round(fuel*.025)+orbitalOps+22;
+ const massOK=wet<=l.capacity,powerOK=generated>=powerDemand,dvOK=dv>=t.required,costOK=cost<=budget;
+ return {i,e,l,a,t,solar,fuel,budget,solarMass,dry,wet,powerDemand,generated,dv,cost,orbitalOps,massOK,powerOK,dvOK,costOK,ready:massOK&&powerOK&&dvOK&&costOK};
+}
+function money(n){return '$'+n+'M'}
+function setBar(id,v){$(id).style.width=Math.max(0,Math.min(100,v))+'%'}
+function update(){
+ const c=config();
+ $('solarVal').textContent=c.solar+' W';$('fuelVal').textContent=c.fuel+' kg';$('budgetVal').textContent=money(c.budget);
+ $('instrumentInfo').textContent=`Mass ${c.i.mass} kg · ${c.i.power} W · science value ${c.i.science}`;
+ $('engineInfo').textContent=`Isp ${c.e.isp} s · ${c.engine==='ion'?'low thrust, high efficiency':$('engine').value==='chemical'?'high thrust, lower efficiency':'balanced thrust and efficiency'}`;
+ $('launcherInfo').textContent=`Payload capacity ${c.l.capacity.toLocaleString()} kg · ${money(c.l.cost)}`;
+ $('mass').textContent=c.wet+' kg';$('power').textContent=(c.generated-c.powerDemand>=0?'+':'')+(c.generated-c.powerDemand)+' W';$('dv').textContent=c.dv.toFixed(2);$('cost').textContent=money(c.cost);
+ $('massSub').textContent=`${c.l.capacity-c.wet} kg margin`; $('powerSub').textContent=c.generated>=c.powerDemand?'surplus available':'power deficit';$('costSub').textContent=`${c.budget-c.cost}M remaining`;
+ setBar('massBar',c.wet/c.l.capacity*100);setBar('powerBar',c.generated/c.powerDemand*100);setBar('dvBar',c.dv/c.t.required*100);setBar('costBar',c.cost/c.budget*100);
+ $('checks').innerHTML=[
+ ['Launch mass',c.massOK,`${c.wet} / ${c.l.capacity} kg`],
+ ['Electrical power',c.powerOK,`${c.generated} W generated / ${c.powerDemand} W required`],
+ ['Propulsive capability',c.dvOK,`${c.dv.toFixed(2)} / ${c.t.required.toFixed(1)} km/s required`],
+ ['Program budget',c.costOK,`${money(c.cost)} estimated / ${money(c.budget)} available`]
+ ].map(([n,ok,d])=>`<div class="check"><div><b>${n}</b><div class="tiny muted">${d}</div></div><span class="pill ${ok?'pass':'fail'}">${ok?'PASS':'FAIL'}</span></div>`).join('');
+ $('readyPill').textContent=c.ready?'MISSION READY':'DESIGN BLOCKED';$('readyPill').className='pill '+(c.ready?'pass':'fail');
+ $('launchBtn').disabled=!c.ready;
+ $('sideCost').textContent=money(c.cost);$('sideBudget').textContent=money(c.budget);setBar('sideBudgetBar',c.cost/c.budget*100);
+ $('massRatio').textContent=Math.round(c.wet/c.l.capacity*100)+'%';setBar('sideMassBar',c.wet/c.l.capacity*100);
+ $('powerRatio').textContent=Math.round(c.generated/c.powerDemand*100)+'%';setBar('sidePowerBar',c.generated/c.powerDemand*100);
+ $('dvRatio').textContent=c.dv.toFixed(1)+' / '+c.t.required.toFixed(1);setBar('sideDvBar',c.dv/c.t.required*100);
+}
+['objective','orbit','instrument','engine','launcher','antenna','solar','fuel','budget'].forEach(id=>$(id).addEventListener('input',update));
+$('resetBtn').onclick=()=>{ $('objective').value='mars';$('orbit').value='mars';$('instrument').value='camera';$('engine').value='chemical';$('launcher').value='medium';$('antenna').value='high';$('solar').value=450;$('fuel').value=300;$('budget').value=180;update();};
+$('launchBtn').onclick=()=>{const c=config();if(!c.ready)return;$('launchPanel').classList.remove('hidden');$('launchPanel').scrollIntoView({behavior:'smooth',block:'start'});$('launchTitle').textContent=`Launch window: ${c.t.name}`;$('launchDesc').textContent=`Payload mass ${c.wet} kg · launch vehicle capacity ${c.l.capacity} kg · planned transfer Δv ${c.dv.toFixed(2)} km/s.`;};
+function log(msg){state.log.push(msg)}
+$('countdownBtn').onclick=()=>{
+ const c=config();$('countdownBtn').disabled=true;
+ const insertion=Math.max(45,Math.min(100,Math.round(72+(c.dv/c.t.required-1)*22+(c.l.capacity-c.wet)/c.l.capacity*20)));
+ state.health=insertion;state.fuel=100;state.power=100;state.science=0;state.day=0;state.done=false;state.log=[];
+ log(`Launch vehicle deployed ${c.wet} kg spacecraft toward ${c.t.name}.`);
+ log(`Orbital insertion quality: ${insertion}%.`);
+ $('launchOutcome').classList.remove('hidden');$('launchOutcome').innerHTML=`<h3>${insertion>=85?'Successful orbital insertion':'Insertion achieved with degraded margins'}</h3><p>Flight telemetry reports ${insertion}% spacecraft health. Mission operations are now in control.</p>`;
+ $('opsPanel').classList.remove('hidden');$('opsPanel').scrollIntoView({behavior:'smooth',block:'start'});
+ renderEvent();
+};
+const eventDeck=[
+ {title:'Solar array dust contamination',text:'A dust layer is reducing array output. You can spend stored energy on a cleaning cycle or accept lower generation for the next phase.',choices:[['Run cleaning cycle','clean',-8,0,0,0],['Accept reduced output','accept',0,0,-12,0]]},
+ {title:'Unexpected radiation storm',text:'A solar particle event is approaching. Put the spacecraft into safe mode or keep instruments collecting data through the storm.',choices:[['Enter safe mode','safe',0,0,0,8],['Continue science operations','science',0,0,-18,-15]]},
+ {title:'Communications window',text:'The ground station has a short contact window. Prioritise science data transmission or preserve power for propulsion and thermal control.',choices:[['Transmit science data','transmit',-7,0,0,12],['Preserve spacecraft resources','preserve',0,0,0,0]]},
+ {title:'Reaction wheel anomaly',text:'One attitude-control reaction wheel is behaving erratically. Reconfigure the control system or continue with reduced pointing accuracy.',choices:[['Reconfigure attitude control','reconfig',-5,0,0,7],['Continue with degraded pointing','degraded',0,0,-5,-8]]},
+ {title:'Instrument calibration drift',text:'The primary instrument is drifting from its calibration baseline. Run a recalibration or keep collecting lower-confidence observations.',choices:[['Recalibrate instrument','calibrate',-6,0,0,10],['Continue collecting data','collect',0,0,0,-5]]}
+];
+function renderEvent(){
+ if(state.day>=5){finish();return}
+ const ev=eventDeck[state.day%eventDeck.length];$('opsTitle').textContent=state.day<2?'Cruise and checkout':state.day<4?'Science operations':'End-of-mission sequence';$('dayPill').textContent='DAY '+String(state.day+1).padStart(3,'0');$('eventTitle').textContent=ev.title;$('eventText').textContent=ev.text;
+ $('eventActions').innerHTML=ev.choices.map((ch,n)=>`<button class="btn ${n?'secondary':'cyan'}" data-choice="${n}">${ch[0]}</button>`).join('');
+ [...$('eventActions').querySelectorAll('button')].forEach(b=>b.onclick=()=>choose(ev.choices[+b.dataset.choice]));
+ updateOps();
+}
+function choose(ch){
+ const [label,key,pow,fuel,health,science]=ch;state.power=Math.max(0,Math.min(100,state.power+pow));state.fuel=Math.max(0,state.fuel+fuel);state.health=Math.max(0,Math.min(100,state.health+health));state.science=Math.max(0,state.science+science);
+ log(`${eventDeck[state.day%eventDeck.length].title}: ${label}.`);
+ [...$('eventActions').querySelectorAll('button')].forEach(b=>b.disabled=true);
+ $('eventText').textContent=`Decision recorded: ${label}. Advance the mission clock when ready.`;
+ updateOps();
+}
+function updateOps(){
+ $('opsPower').textContent=state.power+'%';$('opsFuel').textContent=state.fuel+'%';$('opsHealth').textContent=state.health+'%';
+}
+$('nextDay').onclick=()=>{
+ if(state.done)return;
+ if(!$('eventActions').querySelector('button:disabled')){log('Mission day advanced without a recorded decision.');state.health=Math.max(0,state.health-8);state.power=Math.max(0,state.power-10);}
+ state.day++;
+ const c=config();state.power=Math.max(0,state.power-(c.powerDemand>c.generated?15:5));
+ state.fuel=Math.max(0,state.fuel-( $('engine').value==='ion'?7:13));
+ state.health=Math.max(0,state.health-(state.power<15?12:state.fuel<10?8:2));
+ if(state.health<=0||state.power<=0||state.fuel<=0){log('Critical subsystem depletion. Mission terminated.');finish(true);return}
+ renderEvent();
+};
+function finish(failed=false){
+ state.done=true;$('opsPanel').classList.add('hidden');$('resultsPanel').classList.remove('hidden');
+ const c=config(),score=Math.max(0,Math.min(100,Math.round((state.science*1.4)+(c.i.science*.45)+(state.health*.28)+(state.power*.12)+(state.fuel*.08)+(failed?-25:10))));
+ $('finalScore').textContent=score+'/100';
+ $('resultHeadline').textContent=failed?'Mission lost: valuable engineering lessons recovered.':score>=80?'Mission success: exceptional systems management.':score>=60?'Mission success: useful science returned.':'Partial success: the spacecraft survived, but objectives were limited.';
+ $('resultText').textContent=`Your ${c.t.name} mission completed ${state.day} simulated mission days. You returned ${state.science} science points with ${state.health}% spacecraft health. This score is a game performance index, not a real mission success probability.`;
+ $('resultGrid').innerHTML=[['Science points',state.science],['Spacecraft health',state.health+'%'],['Propellant remaining',state.fuel+'%']].map(([a,b])=>`<div class="metric"><span>${a}</span><strong>${b}</strong></div>`).join('');
+ $('finalLog').innerHTML=state.log.map(x=>`<div class="logItem">${x}</div>`).join('');
+ $('resultsPanel').scrollIntoView({behavior:'smooth'});
+}
+$('playAgain').onclick=()=>{location.reload()};
+update();
+</script>
+</body></html>
